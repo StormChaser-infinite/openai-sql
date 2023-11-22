@@ -54,7 +54,7 @@ def read_questions_list(sql: str, filename: str):
     return messages,questions
 
 
-def connect_openai(filename: str,prompts: list, questions: list, ):
+def connect_openai(filename: str,prompts: list, questions: list):
     """connect to Azure openai and run promots to retrive the response"""
     file_reviewed = filename[0:filename.find('.')]
     response = {"queryId": file_reviewed, 
@@ -70,7 +70,7 @@ def connect_openai(filename: str,prompts: list, questions: list, ):
             completion = client.chat.completions.create( model="cd-kmrt-sbx-gpt4",  
                                                         messages=[{"role": "user","content": prompts[m]},])
             
-            resp.append({"questionId": m,
+            resp.append({"questionId": m+1,
                           questions[m]: completion.choices[0].message.content})
             questions_count = questions_count + 1
 
