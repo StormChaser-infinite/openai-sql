@@ -6,11 +6,26 @@ import datetime as dt
 import logging
 import json
 
+
 input_container = 'sql-selected'
 cosmos_db_name = "sql-model-review"
 collection_name = "kitt-collection"
 app = func.FunctionApp()
 @app.blob_trigger(arg_name="myblob", path="sql-selected/{name}",connection="blobconnectionstring") 
+
+
+def read_sql_query(myblob: func.InputStream):
+    logging.info(f"Python blob trigger function processed blob"
+                f"Name: {myblob.name}"
+                f"Blob Size: {myblob.length} bytes")
+
+    file_name = myblob.name[myblob.name.find("/")+1:]
+    sql_string = read_blob(file_name)
+    messages,questions = read_questions_list(sql_string, file_name)
+
+    response = connect_openai(file_name, messages,questions)
+
+    save_reponses(response)
 
 
 def read_blob(filename: str):
@@ -20,10 +35,11 @@ def read_blob(filename: str):
                                         credential= "6n/WfghjW+2xAN2h1iCiYxELJPADDC9h5Fr+iLbg+/1kBSoD8eVSeyeStKEyALWyNRE4XEBT8OJY+ASt5EspHQ==",
                                         container_name = input_container)
         contents = blobservice.get_blob_client(filename).download_blob().readall()
+     
         print(f"Successfully read the file - {filename} from blob container!")
         return contents
     except Exception as e:
-        print(f"Fails to connect to the blob container, the error is {e}.")
+        print(f"Failed to connect to the blob container, the error is {e}.")
 
 
 def read_questions_list(sql: str, filename: str):
@@ -91,18 +107,6 @@ def save_reponses(messages: dict):
 
 
 
-def read_sql_query(myblob: func.InputStream):
-    logging.info(f"Python blob trigger function processed blob"
-                f"Name: {myblob.name}"
-                f"Blob Size: {myblob.length} bytes")
-    
-    filename = myblob.name[myblob.name.find("/")+1:]
-    sql_string = read_blob(filename)
-    messages,questions = read_questions_list(sql_string, filename)
-
-    response = connect_openai(filename, messages,questions)
-
-    save_reponses(response)
 
 
 
