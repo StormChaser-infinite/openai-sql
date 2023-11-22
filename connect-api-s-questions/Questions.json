@@ -1,0 +1,7 @@
+{ "Q1": "Summarise the SQL query.",
+  "Q2": "how the data is flowing?",
+  "Q3": "what are the inputs?",
+  "Q4": "what are the outputs?",
+  "Q5": "what variables are created?",
+  "Q6": "what are the risks running this query?"
+  }
